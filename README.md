@@ -14,6 +14,15 @@ usage:
 - compilieren und hochladen
 - auf der Modellbahn anschliessen und verwenden ...
 
+Die Selectrix Lib wurde entwickelt von Michael Blank und weiterentwickelt von Reinhard Thamm.
+
+(Es gibt verschiedene Weiterentwicklungen zu Selectrix-1, die leider nicht zueinander kompatibel sind, mit denen beschäftigen wir uns hier NICHT.)
+
+Selectrix™ ist ein sehr altes (80ziger Jahre) Modellbahn-Digitalsystem (auch kurz "SX" genannt) und wird vom Hersteller TRIX nicht mehr weiterentwickelt. (das Markenzeichen SelecTRIX gehört TRIX, jetzt Märklin).
+
+Die Originalversion von Selectrix (jetzt Selectrix 1 genannt) ist ziemlich einfach und wurde genormt in den MOROP Normen NEM 680 und NEM 681.
+
+
 (SX is an open Model Railroad Control System, standardized in
 NEM 680 and NEM 681, Selectrix is a Trademark of TRIX - now owned by
 Maerklin)

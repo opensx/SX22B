@@ -11,8 +11,10 @@
  *
  *  !!! SX lib does not work with SoftwareSerial Lib !!!
  *
- *  Hardware: SX-Basisplatine von R.Thamm 
+ *  benötigte Hardware:
+ *     SX-Basisplatine von R.Thamm 
  *     + Xbee an RX/TX des Arduino Pro Mini
+ *  siehe http://opensx.net/funkregler/basisstation-xbee-platine
  */
 
 
