@@ -2,7 +2,7 @@
  * SX22Command.h
  *
  *  Created on: 10.11.2013
- *  Changed on: 25.9.2015 (for SX22)
+ *  Changed on: 25.9.2015
  *  Version:    2.1
  *  Copyright:  Michael Blank
  
@@ -32,10 +32,10 @@
 #define COMMAND_ERROR    1
 
 
-class SXCommand {
+class SX22Command {
    
 public:
-	SXCommand();
+	SX22Command();
 	void decode(String);
 	uint8_t channel;
     uint8_t data;
@@ -45,4 +45,4 @@ private:
 	
 };
 
-#endif /* SXCOMMAND_H_ */
+#endif /* SX22COMMAND_H_ */

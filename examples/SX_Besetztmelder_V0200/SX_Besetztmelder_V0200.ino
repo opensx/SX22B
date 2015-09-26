@@ -41,7 +41,7 @@
 #include <SX22b.h>  // Pin2=T0=INT0, Pin4=T1, Pin6=SX-Write
 #include <EEPROM.h>
 
-SX sx;
+SX22b sx;
 
 #define  DEFAULTADDR  60               // die Adresse, auf die dieses Modul hört
 #define  DEFAULTCODEDDELAYTIME 20      // *25ms = 500ms Abfallverzögerung

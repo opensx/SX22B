@@ -17,7 +17,7 @@
  */
 
 
-#include <SX22.h>   // this is the Selectrix library
+#include <SX22b.h>   // this is the Selectrix library
 #include <SX22Command.h>   // this is the Selectrix Command library
 
 #define LED_PIN  13   // on most Arduinos there is an LED at pin 13
@@ -26,8 +26,8 @@
 #define LED_97_1 9    // read sx channel 97 and switch on/off LEDs 
 #define LED_97_2 10   // on pins 9 and 10
 
-SX sx;                // library
-SXCommand sxcmd;      // holds command data
+SX22b sx;                // library
+SX22Command sxcmd;       // holds command data
 
 static int ledState = LOW;
 static byte oldSx[MAX_CHANNEL_NUMBER];

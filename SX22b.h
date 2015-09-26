@@ -45,8 +45,8 @@
 
  */
 
-#ifndef SX_H_
-#define SX_H_
+#ifndef SX22b_H_
+#define SX22b_H_
 
 #include <inttypes.h>
 
@@ -80,9 +80,9 @@
 
 #define MAX_CHANNEL_NUMBER 112   // SX channels
 
-class SX {
+class SX22b {
 public:
-	SX();
+	SX22b();
 	void init(void);
     void init(uint8_t);	
 	uint8_t get(uint8_t);
@@ -129,4 +129,4 @@ private:
 	 1   Gesamtrahmen   ca.  80 ms (= 16 Grundrahmen)  */
 };
 
-#endif /* SX_H_ */
+#endif /* SX22b_H_ */

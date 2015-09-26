@@ -1,5 +1,5 @@
 /*
- * SXCommand.cpp
+ * SX22Command.cpp
  *  holds an SX command, composed of channel, data and error
  *  methode:
  *        decode() an ASCII String to get an SX channel number 
@@ -30,19 +30,19 @@
 
 #include <Arduino.h> 
 
-#include "SXCommand.h"
-#include "SX22.h"
+#include "SX22Command.h"
+#include "SX22b.h"
 
 
-SXCommand::SXCommand() {
+SX22Command::SX22Command() {
     err = COMMAND_ERROR;
 }
 
 /** converts a string to 2 integer numbers 
- *     first one in the range 0..111 (sx channel)
+ *     first one in the range 0..111 (SX channel)
  *     second one in the range 0..255 (data)
  */
-void SXCommand::decode(String s) {
+void SX22Command::decode(String s) {
     
 	uint16_t rv = 0;
 	channel = 0;

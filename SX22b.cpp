@@ -56,11 +56,11 @@
 #include "SX22b.h"
 
 
-SX::SX() {
+SX22b::SX22b() {
     _scopeFlag = 0;
 }
 
-void SX::init() {
+void SX22b::init() {
      // initialize function
      // initialize pins and variables
      // and start looking for a SYNC signal
@@ -85,7 +85,7 @@ void SX::init() {
     _newTrackBit = 2;                                               //Tha
 }
 
-void SX::init(uint8_t tba) {
+void SX22b::init(uint8_t tba) {
     // special init which enable a scope trigger
     // at a Selectrix address tba (must be 0..112)
     // scope will go high at bit 12 of this address!!
@@ -97,7 +97,7 @@ void SX::init(uint8_t tba) {
     init();
 }
 
-uint8_t SX::set(uint8_t ch, uint8_t d) {
+uint8_t SX22b::set(uint8_t ch, uint8_t d) {
     if (_sx_write_busy) return 1;  // dont accept new data
 
     _sx_write_channel = ch;
@@ -107,7 +107,7 @@ uint8_t SX::set(uint8_t ch, uint8_t d) {
 
 }
 
-void SX::switchAdr() {
+void SX22b::switchAdr() {
      // a SYNC signal was received, now look for a valid
      // base address
     switch(_adrCount) {
@@ -150,7 +150,7 @@ void SX::switchAdr() {
     }
 }
 
-void SX::switchData() {
+void SX22b::switchData() {
     // continue reading _data
     // a total of 7 DATA blocks will be received
     // for a certain base-address
@@ -280,7 +280,7 @@ void SX::switchData() {
     }  //end switch/case _dataBitCount
 }
 
-uint8_t SX::get(uint8_t channel) {
+uint8_t SX22b::get(uint8_t channel) {
      // returns the value of a SX channel
     if (channel < MAX_CHANNEL_NUMBER)
        return _sx[channel];
@@ -288,21 +288,21 @@ uint8_t SX::get(uint8_t channel) {
        return 0;
 }
 
-uint8_t SX::getTrackBit() {                                     //Tha: getting the Track-Bit (track
+uint8_t SX22b::getTrackBit() {                                     //Tha: getting the Track-Bit (track
     return _trackBit;                                           //      voltage on/off), due to an
 }                                                               //      idea from Uli Beyenbach
 
-void SX::setTrackBit(uint8_t val) {                             //Tha: setting the Track-Bit (track
+void SX22b::setTrackBit(uint8_t val) {                             //Tha: setting the Track-Bit (track
     if (val==0 || val==1) {                                     //      voltage on/off), due to an
         _newTrackBit = val;                                     //      idea from Uli Beyenbach
     }
 }
 
-uint8_t SX::writing() {                                         //Tha:
+uint8_t SX22b::writing() {                                         //Tha:
     return _sx_write_busy;                                      //
 }
 
-void SX::isr() {
+void SX22b::isr() {
 
     // interrupt service routine (AVR INT0)
     // driven by RISING clock signal T0 (SX pin 1)
