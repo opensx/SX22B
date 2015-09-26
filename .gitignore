@@ -1,3 +1,6 @@
+*.private
+*~
+
 # Object files
 *.o
 *.ko
