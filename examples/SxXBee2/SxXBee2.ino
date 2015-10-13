@@ -1,31 +1,30 @@
 /*
  * SxXBee2.ino
  *
- *  Created on: 28.08.2015
- *  Changed on: 30.08.2015
+ *  Changed on: 12.10.2015   new protocol rev1.1
  *  Changed on: 04.09.2015   broadcast of power state
- *  Changed on: 26.09.2015   new wording: SX22b class
+ *  Created on: 28.08.2015
+ *  
+ *
  *  Author and Copyright: Michael Blank
  *
  *  reads date from xbee and sends them to SX Bus
  *
  *  !!! SX lib does not work with SoftwareSerial Lib !!!
  *
- *  benötigte Hardware:
- *     SX-Basisplatine von R.Thamm 
+ *  Hardware: SX-Basisplatine von R.Thamm 
  *     + Xbee an RX/TX des Arduino Pro Mini
- *  siehe http://opensx.net/funkregler/basisstation-xbee-platine
  */
 
 
 #include <SX22b.h>   // this is the Selectrix library
-#include <SX22Command.h>   // this is the Selectrix Command library
+#include <SXCommand.h>   // this is the Selectrix Command library
 #include <XBee.h> // XBee library by Andrew Rapp
 
 #define LED  13   // LED indicator at pin 13
 
 SX22b sx;                // selectrix library
-SX22Command sxcmd;      // holds command data
+SXCommand sxcmd;      // holds command data
 
 static int ledState = LOW;
 static byte oldSx[MAX_CHANNEL_NUMBER];
@@ -35,7 +34,7 @@ String inputString = "";         // a string to hold incoming data
 
 static uint8_t track, oldTrack;
 
-uint8_t payload[12] ;   // 12 byte string for sending data to coordinator
+uint8_t payload[12] ;   // 12 byte string for sending data to xbees
 
 // Create an XBee object
 XBee xbee = XBee();
@@ -45,7 +44,7 @@ XBeeResponse response = XBeeResponse();
 ZBRxResponse rx = ZBRxResponse();
 ModemStatusResponse msr = ModemStatusResponse();
 
-// Address of receiving XBee
+// Address of receiving XBee (always: Broadcast!)
 XBeeAddress64 broadcast64;
 ZBTxRequest zbTx;
 ZBTxStatusResponse txStatus;
@@ -71,7 +70,7 @@ void ledToggle() {
 */
 void setup() {
 
-    Serial.begin(9600);      // for comm with xbee
+    Serial.begin(9600);      // for comm with xbee - TODO increase to 57600
     pinMode(LED,OUTPUT);     // indicator for rec. packet
     xbee.setSerial(Serial);
     broadcast64 = XBeeAddress64(0, 0x0000FFFF);  //broadcast address
@@ -87,24 +86,55 @@ void setup() {
     delay(100); // give some time to initalize
 }
 
-/** transmit power state as broadcast to all XBees
- *  "P 1" = track power (gleisbit) is on
- *  "P 0" = track power is off
+/** transmit loco data as "adr data" broadcast
+    to all xbees
 */
-void send_power_state(uint8_t on) {
+void sendData(uint8_t ch, uint8_t d) {
   for (int i=0; i <12; i++) {
     payload[i]=0;
   }
-      payload[0]='P';
-      payload[1]= ' ';
-      if (on == 1) {
-         payload[2] = '1';
-      } else {
-         payload[2] = '0';
-      }
-      payload[3]=0;  // string end  */
+   payload[0]='F';  // for "feedback"
+  // address (channel) to string
+   uint8_t p3 = ch / 100;
+   uint8_t p2 = (ch - 100*p3) / 10;
+   uint8_t p1 = (ch - 100*p3 - 10*p2);
+   uint8_t end = 3;
+   
+   if (p3 == 0) {
+      payload[1]= (uint8_t)p2 + '0';
+      payload[2]= (uint8_t)p1 + '0';
+      payload[3]= ' ';
+      end = 3;
+   } else {
+      payload[1]= (uint8_t)p3 + '0';
+      payload[2]= (uint8_t)p2 + '0';
+      payload[3]= (uint8_t)p1 + '0';
+      payload[4]= ' ';
+      end = 4;
+   }
 
-      xbee.send(zbTx);
+   // convert data to string
+   p3 = d / 100;
+   p2 = (d - 100*p3) / 10;
+   p1 = (d - 100*p3 - 10*p2);
+   if (p3 == 0) {
+      payload[end+1]= (uint8_t)p2 + '0';
+      payload[end+2]= (uint8_t)p1 + '0';
+      payload[end+3]= '\n';
+   } else {
+      payload[end+1]= (uint8_t)p3 + '0';
+      payload[end+2]= (uint8_t)p2 + '0';
+      payload[end+3]= (uint8_t)p1 + '0';
+      payload[end+4]= '\n';   // index max. 8 (of 11)
+   }
+
+#if defined(_DEBUG) || defined(_DEBUG_AVR)
+   sendPayloadToSerial();
+#endif   // defined(_DEBUG) || defined(_DEBUG_AVR)
+
+#ifndef _DEBUG_AVR
+   xbee.send(zbTx);
+#endif
 }
 
 /** receive loop for:
@@ -125,20 +155,38 @@ void loop() {
             char c = rx.getData(i);
             s += c;
          }
-
-         // interpret SX command from XBee
-         int n= s.indexOf(' '); // command split by space
-         // example:  "44 31" = set loco #44 to speed 31,
-         //                forward, Light=off, F=off
-         //       (standard selectrix data format, 8 bit)
-         if (n != -1) {
-            String ch = s.substring(0,n);
+         if ((s[0] == 'R') || (s[0] == 'r')) {
+            // read command, 1 int attribute
+            // "R44" =read data of channel 44
+            String ch = s.substring(1);
             int i_ch = ch.toInt();
-            String s2 = s.substring(n+1,s.length());
-            int i_value = s2.toInt();
-            do {
- 		delay(10);
-            } while (sx.set(i_ch,i_value));  // send to SX bus
+            if ( ((i_ch >=1) && (i_ch <=99))
+                || (i_ch == 127)) {
+               uint8_t d = sx.get(i_ch);
+               sendData((uint8_t)i_ch, d);
+            }
+         } else if ((s[0] == 'S') || (s[0] == 's')) {
+            // "SET" command
+            // interpret SX command from XBee
+            int n= s.indexOf(' '); // command split by space
+            // example:  "S44 31" = set loco #44 to speed 31,
+            //                forward, Light=off, F=off
+            //       (standard selectrix data format, 8 bit)
+            // 127=trackpower also handled like a standard SX channel
+            if (n != -1) {
+               String ch = s.substring(1,n); // remove leading 's', until space
+               int i_ch = ch.toInt();
+               String s2 = s.substring(n+1,s.length());
+               int i_value = s2.toInt();
+               if ((i_value >= 0 ) && (i_value <= 255)) {  //data valid
+                  uint8_t dsx = sx.get(i_ch);  // read current data on bus for this loco
+                  if (dsx != (uint8_t)i_value) { // sent only if data have changed
+                     do {
+                        delay(10);
+                     } while (sx.set(i_ch,i_value));  // send to SX bus
+                  }
+               }
+            }
 
          }
          digitalWrite(LED,LOW);  // indicate stop of send to SX Bus
@@ -153,7 +201,11 @@ CURRENTLY NOT HANDLED
     if ((track != oldTrack) || ( (millis() - lastPowerSent) > 10000 ) ){  
       oldTrack = track;
       lastPowerSent = millis();
-      send_power_state(track);
+      if (track == 0) {
+         sendData(127,0);
+      } else {
+         sendData(127,1);
+      }
     }
 
 }
