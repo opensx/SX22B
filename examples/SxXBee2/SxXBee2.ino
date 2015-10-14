@@ -18,13 +18,13 @@
 
 
 #include <SX22b.h>   // this is the Selectrix library
-#include <SXCommand.h>   // this is the Selectrix Command library
+#include <SX22Command.h>   // this is the Selectrix Command library
 #include <XBee.h> // XBee library by Andrew Rapp
 
 #define LED  13   // LED indicator at pin 13
 
 SX22b sx;                // selectrix library
-SXCommand sxcmd;      // holds command data
+SX22Command sxcmd;      // holds command data
 
 static int ledState = LOW;
 static byte oldSx[MAX_CHANNEL_NUMBER];
