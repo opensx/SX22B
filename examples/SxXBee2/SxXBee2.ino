@@ -1,6 +1,7 @@
 /*
  * SxXBee2.ino
- *
+ *  
+ *  Changed on: 16.10.2015   corrected SX22Command
  *  Changed on: 12.10.2015   new protocol rev1.1
  *  Changed on: 04.09.2015   broadcast of power state
  *  Created on: 28.08.2015
@@ -18,13 +19,13 @@
 
 
 #include <SX22b.h>   // this is the Selectrix library
-#include <SXCommand.h>   // this is the Selectrix Command library
+#include <SX22Command.h>   // this is the Selectrix Command library
 #include <XBee.h> // XBee library by Andrew Rapp
 
 #define LED  13   // LED indicator at pin 13
 
 SX22b sx;                // selectrix library
-SXCommand sxcmd;      // holds command data
+SX22Command sxcmd;      // holds command data
 
 static int ledState = LOW;
 static byte oldSx[MAX_CHANNEL_NUMBER];
