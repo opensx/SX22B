@@ -161,9 +161,11 @@ void loop() {
             // "R44" =read data of channel 44
             String ch = s.substring(1);
             int i_ch = ch.toInt();
-            if ( ((i_ch >=1) && (i_ch <=99))
-                || (i_ch == 127)) {
+            if ((i_ch >=1) && (i_ch <=99)) {
                uint8_t d = sx.get(i_ch);
+               sendData((uint8_t)i_ch, d);
+            } else if (i_ch == 127) {
+               uint8_t d = sx.getTrackBit();
                sendData((uint8_t)i_ch, d);
             }
          } else if ((s[0] == 'S') || (s[0] == 's')) {
@@ -180,11 +182,15 @@ void loop() {
                String s2 = s.substring(n+1,s.length());
                int i_value = s2.toInt();
                if ((i_value >= 0 ) && (i_value <= 255)) {  //data valid
-                  uint8_t dsx = sx.get(i_ch);  // read current data on bus for this loco
-                  if (dsx != (uint8_t)i_value) { // sent only if data have changed
-                     do {
-                        delay(10);
-                     } while (sx.set(i_ch,i_value));  // send to SX bus
+                  if (i_ch == 127) {
+                    sx.setTrackBit(i_value);
+                  } else {
+                    uint8_t dsx = sx.get(i_ch);  // read current data on bus for this loco
+                    if (dsx != (uint8_t)i_value) { // sent only if data have changed
+                       do {
+                          delay(10);
+                       } while (sx.set(i_ch,i_value));  // send to SX bus
+                    }
                   }
                }
             }

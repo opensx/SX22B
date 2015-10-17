@@ -1,5 +1,6 @@
 *.private
 *~
+*.swp
 
 # Object files
 *.o
