@@ -36,14 +36,14 @@
  *                  "Programmieren über die Kanäle 1 bis 5" im Comment);
  *                  Zielhardware als #define entfernt
 *******************************************************************************************/
-#define TESTVERSION  // aktiviert serielle Testausgaben und Dialog über Serial Interface
+//#define TESTVERSION  // aktiviert serielle Testausgaben und Dialog über Serial Interface
 
 #include <SX22b.h>  // Pin2=T0=INT0, Pin4=T1, Pin6=SX-Write
 #include <EEPROM.h>
 
 SX22b sx;
 
-#define  DEFAULTADDR  60               // die Adresse, auf die dieses Modul hört
+#define  DEFAULTADDR  98               // die Adresse, auf die dieses Modul hört
 #define  DEFAULTCODEDDELAYTIME 20      // *25ms = 500ms Abfallverzögerung
 #define  DELAYTIMEFACTOR 25            // 1 digit entspricht 25ms
 

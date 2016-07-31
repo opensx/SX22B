@@ -1,18 +1,22 @@
 /*
- * sx_interface.ino
+ * SxWiFie.ino
  *
- *  Created on: 10.11.2013
- *  Changed on: 25.9.2015
+ *  Created on: 31.07.2016
  *  
  *  Author: Michael Blank
  *  
  *  Example program for the Selectrix(TM) Library
- *  sends SX data to serial port (only when data change)
- *  format:    V  80  16   (data bit 5 set on sx channel 80)
- *  and reads commands from the serial port, interprets
+ *  sends SX data to WiFi Interface with MKR100
+ *  see http://opensx.net/projects/Funkregler2
+ *  
+ *  format:    F  80  16   (data bit 5 set on sx channel 80)
+ *  and reads commands from the MKR serial port, interprets
  *  them and send them on SX Bus.
  *  format:    S <ch> <data>   (or SET .. ..)
  *             S  80  255   sets all bits for channel 80      
+ *             
+ *  F = feedback (from command station)
+ *  S = set (a channel/value pair)
  *  
  */
 
@@ -21,6 +25,8 @@
 #include <SX22Command.h>   // this is the Selectrix Command library
 
 #define LED_PIN  13   // on most Arduinos there is an LED at pin 13
+          // LED is toggled when data from the command station
+          // have changed
 
 //#define LED_CMD  13
 //#define LED_97_1 9    // read sx channel 97 and switch on/off LEDs 
@@ -39,7 +45,7 @@ boolean cmdState = false;
 
 void printSXValue(int i,int data) {
     // send data for 1 SX Channel on serial port
-    Serial.print("V ");
+    Serial.print("F ");
     Serial.print(i);
     Serial.print(" ");
     Serial.println(data);
