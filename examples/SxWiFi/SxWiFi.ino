@@ -1,5 +1,5 @@
 /*
- * SxWiFie.ino
+ * SxWiFi.ino
  *
  *  Created on: 31.07.2016
  *  
@@ -7,7 +7,10 @@
  *  
  *  Example program for the Selectrix(TM) Library
  *  sends SX data to WiFi Interface with MKR100
- *  see http://opensx.net/projects/Funkregler2
+ *  (i.e. this is the Arduino Pro Mini part of the
+ *    interface SW)
+ *  needs special hardware:
+ *    see http://opensx.net/projects/Funkregler2
  *  
  *  format:    F  80  16   (data bit 5 set on sx channel 80)
  *  and reads commands from the MKR serial port, interprets
