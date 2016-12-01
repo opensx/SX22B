@@ -35,22 +35,17 @@ Signal.h
 class Signal {
    
 public:
-    Signal(uint8_t, uint8_t);  // 2 aspect signal red/green
-	  Signal(uint8_t, uint8_t, uint8_t);  // 3 aspect signal red, green, (green+yellow)
-    Signal(uint8_t, uint8_t, uint8_t, uint8_t);  // 4 aspect signal
+    Signal(uint8_t);  // 4 aspect signal
            // red, green, (green+yellow), white (sh0)
     void process(void);  // needed for fade effects
-    uint8_t set(uint8_t value);   // 0 ... N
-    uint8_t get(void);   // return state
+    uint8_t set(uint8_t value);   // 0 ... (N-1)
     void init(void);
 
-
-private:
-    uint8_t _actual[N_ASPECTS];  // actual (analog) value of pin
-    uint8_t _final[N_ASPECTS];
-    uint8_t _pin[N_ASPECTS];  // arduino pin number 
-    uint8_t _npins;  // actual number of aspects for current signal
-    uint8_t _state;  // contains last value of command = last known signal state
+    uint8_t number;   // signal A (=0) or B (=1)
+    uint8_t actual[N_ASPECTS];  // actual (analog) value of pin
+    uint8_t final[N_ASPECTS];
+    uint8_t state;  // contains last value of command = last known signal state
+    uint32_t mytimer = 0;
 };
 
 #endif /* SIGNAL_H_ */

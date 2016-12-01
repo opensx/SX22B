@@ -1,10 +1,9 @@
 /* 
 
-signal_def.h
+ signal_def.h
+
 
  *  Created on: 30 nov 2016
- *  Changed on: 
- *  Version:    0.1
  *  Copyright:  Michael Blank
  
  This library is free software; you can redistribute it and/or
@@ -29,31 +28,63 @@ signal_def.h
 #include <WString.h>
 #include <inttypes.h>
 
-//Tha: for faster direct bitwise operations
+// for english signals / Command Ground (A2982)
+// value 0 = RED
+// value 1 = GREEN
+// value 2 = YELLOW
+// value 3 = Feather & YELLOW
+
+//for faster direct bitwise operations
+
 #define SIG_A_R           A0   
 #define SIG_A_R_DDR       DDRC      
 #define SIG_A_R_PORT      PORTC           
-#define SIG_A_R_PORTPIN   PORTC0  
+#define SIG_A_R_PPIN      PORTC0  
 
 #define SIG_A_G           12   
 #define SIG_A_G_DDR       DDRB      
 #define SIG_A_G_PORT      PORTB           
-#define SIG_A_G_PORTPIN   PORTB4    
+#define SIG_A_G_PPIN      PORTB4    
 
 #define SIG_A_Y           11   
 #define SIG_A_Y_DDR       DDRB      
 #define SIG_A_Y_PORT      PORTB           
-#define SIG_A_Y_PORTPIN   PORTB3   
+#define SIG_A_Y_PPIN      PORTB3   
 
 #define SIG_A_4           10   
 #define SIG_A_4_DDR       DDRB      
 #define SIG_A_4_PORT      PORTB           
-#define SIG_A_4_PORTPIN   PORTB2   
+#define SIG_A_4_PPIN      PORTB2   
 
-#define SIG_A_R_(val)   (bitWrite(SIG_A_R_PORT, SIG_A_R_PORTPIN, val)) 
-#define SIG_A_G_(val)   (bitWrite(SIG_A_G_PORT, SIG_A_G_PORTPIN, val)) 
-#define SIG_A_Y_(val)   (bitWrite(SIG_A_Y_PORT, SIG_A_Y_PORTPIN, val)) 
-#define SIG_A_4_(val)   (bitWrite(SIG_A_4_PORT, SIG_A_4_PORTPIN, val)) 
+#define SIG_A_R_(val)   (bitWrite(SIG_A_R_PORT, SIG_A_R_PPIN, val)) 
+#define SIG_A_G_(val)   (bitWrite(SIG_A_G_PORT, SIG_A_G_PPIN, val)) 
+#define SIG_A_Y_(val)   (bitWrite(SIG_A_Y_PORT, SIG_A_Y_PPIN, val)) 
+#define SIG_A_4_(val)   (bitWrite(SIG_A_4_PORT, SIG_A_4_PPIN, val)) 
+
+#define SIG_B_R           9   
+#define SIG_B_R_DDR       DDRB      
+#define SIG_B_R_PORT      PORTB           
+#define SIG_B_R_PPIN      PORTB1  
+
+#define SIG_B_G           8   
+#define SIG_B_G_DDR       DDRB      
+#define SIG_B_G_PORT      PORTB           
+#define SIG_B_G_PPIN      PORTB0    
+
+#define SIG_B_Y           7   
+#define SIG_B_Y_DDR       DDRD      
+#define SIG_B_Y_PORT      PORTD           
+#define SIG_B_Y_PPIN      PORTD7   
+
+#define SIG_B_4           5   
+#define SIG_B_4_DDR       DDRD      
+#define SIG_B_4_PORT      PORTD           
+#define SIG_B_4_PPIN      PORTD5   
+
+#define SIG_B_R_(val)   (bitWrite(SIG_B_R_PORT, SIG_B_R_PPIN, val)) 
+#define SIG_B_G_(val)   (bitWrite(SIG_B_G_PORT, SIG_B_G_PPIN, val)) 
+#define SIG_B_Y_(val)   (bitWrite(SIG_B_Y_PORT, SIG_B_Y_PPIN, val)) 
+#define SIG_B_4_(val)   (bitWrite(SIG_B_4_PORT, SIG_B_4_PPIN, val)) 
 
 #endif /* SIGNAL_DEF_H_ */
 
