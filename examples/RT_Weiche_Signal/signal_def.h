@@ -28,7 +28,7 @@
 #include <WString.h>
 #include <inttypes.h>
 
-// for english signals / Command Ground (A2982)
+// for english signals / Common Ground (A2982)
 // value 0 = RED
 // value 1 = GREEN
 // value 2 = YELLOW
