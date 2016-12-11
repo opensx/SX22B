@@ -6,8 +6,8 @@
  *        and sx data.
  *
  *  Created on: 10.11.2013
- *  Changed on: 10.11.2013
- *  Version:    2.1
+ *  Changed on: 10.12.2016
+ *  Version:    2.2
  *  Copyright:  Michael Blank
  *
  
@@ -87,6 +87,42 @@ void SX22Command::decode(String s) {
 		return;    // number >255 => error
 	}
 	data = (uint8_t) (rv & 0xff);
+	err = COMMAND_OK;
+	return;
+
+}
+
+/** converts a string to 1 integer number 
+ *     in the range 0..111 (SX channel)
+ *     
+ */
+void SX22Command::decodeChannel(String s) {
+    
+	uint16_t rv = 0;
+	channel = 0;
+	data = 0;
+	err = COMMAND_ERROR;
+	
+    uint8_t pos = 0;
+	if (s[pos] == '\0')
+		return;    // string empty => error
+
+	/* skip till we find sxChannel digit */
+	while (s[pos]) {
+		if (s[pos] <= '9' && s[pos] >= '0')
+			break;
+		pos++;
+	}
+
+	while (s[pos] && s[pos] >= '0' && s[pos] <= '9') {
+		rv = (rv * 10) + (s[pos] - '0');
+		pos++;
+	}
+	if (rv >= MAX_CHANNEL_NUMBER) {
+		return;   // number >111 => error
+	}
+	channel = (uint8_t) (rv & 0xff);
+
 	err = COMMAND_OK;
 	return;
 

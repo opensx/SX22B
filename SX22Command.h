@@ -1,9 +1,9 @@
 /*
  * SX22Command.h
  *
- *  Created on: 10.11.2013
+ *  Created on: 10.12.2016
  *  Changed on: 25.9.2015
- *  Version:    2.1
+ *  Version:    2.2
  *  Copyright:  Michael Blank
  
  This library is free software; you can redistribute it and/or
@@ -37,6 +37,7 @@ class SX22Command {
 public:
 	SX22Command();
 	void decode(String);
+	void decodeChannel(String);
 	uint8_t channel;
     uint8_t data;
     uint8_t err; 

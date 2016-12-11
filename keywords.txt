@@ -11,6 +11,7 @@ isr	KEYWORD2
 set	KEYWORD2
 get	KEYWORD2
 decode	KEYWORD2
+decodeChannel	KEYWORD2
 writing KEYWORD2
 getTrackBit	KEYWORD2
 setTrackBit	KEYWORD2
