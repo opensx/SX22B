@@ -2,12 +2,10 @@
  * SX22b.h
  *
  *  Created on: 02.01.2012
- *  Changed on: 10.11.2013
- *  Version:    2.1
+ *  Changed on: 18.12.2016 
+ *  Version:    2.3
  *  Copyright:  Michael Blank
  *
- *  Changed on: 11.01.2015 by Reinhard Thamm, referring to comments
- *  Version:    2.2a
  *
  *  This faster version uses more direct bitwise port and pin operations
  *  and needs to be used if an original TRIX ZENTRALEINHEIT 1 is in use.
@@ -84,11 +82,11 @@ class SX22b {
 public:
 	SX22b();
 	void init(void);
-    void init(uint8_t);	
+        void init(uint8_t);	
 	uint8_t get(uint8_t);
 	uint8_t set(uint8_t, uint8_t);
-	uint8_t writing();          //Tha
-    uint8_t getTrackBit();      //Tha
+        uint8_t writing();          //Tha
+        uint8_t getTrackBit();      //Tha
 	void setTrackBit(uint8_t);  //Tha
 	void isr(void);
 

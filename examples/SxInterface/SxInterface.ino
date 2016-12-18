@@ -2,8 +2,8 @@
  * sx_interface.ino
  *
  *  Created on: 10.11.2013
- *  Changed on: 10.12.2016
- *  Version:    2.2
+ *  Changed on: 18.12.2016
+ *  Version:    2.3
  *  
  *  Author: Michael Blank
  *  
@@ -23,6 +23,8 @@
  *                             F 2 <d2> \n
  *                             ...
  *                             F 111 <d11> \n )
+ *  channel number 127 is used for track power transmission 
+ *   (1 or 0)
  *            
  *  All strings must be terminated by new-line character.
  *  If a correct command "S ..." is received, "OK" is answered
@@ -34,14 +36,18 @@
 #include <SX22Command.h>   // this is the Selectrix Command library
 
 #define LED_PIN  13   // on most Arduinos there is an LED at pin 13
-#define MAX_SX_CHANNEL   109   // do not read values above 110
-              // because FCC does some "strange" multiplexing
+#define MAX_SX_CHANNEL   110   // do not read values >= 110
+      // because FCC does some "strange" multiplexing above 110
+      
+// POWER_CHANNEL, i.e. the number we use for getting the track power
+// state, is defined in SX22Command.h            
 
 SX22b sx;                // library
 SX22Command sxcmd;       // holds command data
 
 static int ledState = LOW;
-static byte oldSx[MAX_CHANNEL_NUMBER];
+static byte oldSx[MAX_SX_CHANNEL];
+static byte oldPower;
 
 String inputString = "";         // a string to hold incoming data
 boolean stringComplete = false;  // whether the string is complete
@@ -52,6 +58,18 @@ void printSXValue(int i, int data) {
 	Serial.print(i);
 	Serial.print(" ");
 	Serial.println(data);
+}
+
+void printAllSXValues() {
+  for (int i = 0; i < MAX_SX_CHANNEL; i++) {
+          byte d = sx.get(i);
+          printSXValue(i, d);   // send new value to serial port
+          oldSx[i] = d;
+        }
+        byte track = sx.getTrackBit();  // power, 0 or 1
+        printSXValue(POWER_CHANNEL, track);
+        oldPower = track;
+        toggleLed();  // indicate change
 }
 
 void toggleLed() {
@@ -76,16 +94,20 @@ void setup() {
 
 	//digitalWrite(LED_PIN, ledState);
 	Serial.begin(115200);      // open the serial port
-	for (int i = 0; i < 112; i++) {
+	for (int i = 0; i < MAX_SX_CHANNEL; i++) {
 		oldSx[i] = 0;   // initialize to zero
-		printSXValue(i, 0);
 	}
-
+  oldPower=0;
+  
 	// initialize interrupt routine
 	sx.init();
 
 	// RISING slope on INT0 triggers the interrupt routine sxisr (see above)
 	attachInterrupt(0, sxisr, RISING);
+
+  delay(100);  // read all channels from bus
+  
+  printAllSXValues();
 }
 
 /*
@@ -109,28 +131,34 @@ void serialEvent() {
 					|| (inputString[0] == 'S')) { // SET command
 				sxcmd.decode(inputString);
 				if (sxcmd.err == COMMAND_OK) {
+          if (sxcmd.channel== POWER_CHANNEL) {
+             if (sxcmd.data) {
+               sx.setTrackBit(1);  // power, 0 or 1
+             } else {
+               sx.setTrackBit(0);  // power, 0 or 1
+             }          
+          } else {   
+            do {
+              delay(10);
+            } while (sx.set(sxcmd.channel, sxcmd.data));      
+          }     
 					Serial.println("OK ");
-					do {
-						delay(10);
-					} while (sx.set(sxcmd.channel, sxcmd.data));
+					
 				} else {
 					Serial.println("ERR");
 				}
 			} else if ((inputString[0] == 'x') 
 					|| (inputString[0] == 'X')) { // READ ALL command
-				for (int i = 0; i < 112; i++) {
-					byte d = sx.get(i);
-					printSXValue(i, d);   // send new value to serial port
-					oldSx[i] = d;
-					printSXValue(i, d);   // send new value to serial port
-				}
-			    toggleLed();  // indicate change
+				printAllSXValues();
 			} else if ((inputString[0] == 'r') 
 					|| (inputString[0] == 'R')) { // READ command
 				sxcmd.decodeChannel(inputString);
 				if (sxcmd.err == COMMAND_OK) {
           int d = sx.get(sxcmd.channel);
-					printSXValue(sxcmd.channel, d);   // send value to serial port
+          if (sxcmd.channel == POWER_CHANNEL) {
+             d = sx.getTrackBit();  // power, 0 or 1 		  
+          } 
+          printSXValue(sxcmd.channel, d);         
 					toggleLed();  // 					
 				} else {
 					Serial.println("ERR");
@@ -149,7 +177,7 @@ void serialEvent() {
 void loop() {
 
 	// check selectrix channels for changes
-	for (int i = 0; i <= MAX_SX_CHANNEL; i++) {
+	for (int i = 0; i < MAX_SX_CHANNEL; i++) {
 		byte d = sx.get(i);
 		if (oldSx[i] != d) {   // data have changed on SX bus
 			oldSx[i] = d;
@@ -157,6 +185,12 @@ void loop() {
 			toggleLed();  // indicate change
 		}
 	}
-
+ // check trackbit for change of track power state
+  byte d = sx.getTrackBit();
+  if (oldPower != d) {
+    oldPower = d;
+    printSXValue(POWER_CHANNEL, d);
+    toggleLed();  // indicate change
+  }
 }
 

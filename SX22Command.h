@@ -1,9 +1,9 @@
 /*
  * SX22Command.h
  *
- *  Created on: 10.12.2016
+ *  Created on: 18.12.2016
  *  Changed on: 25.9.2015
- *  Version:    2.2
+ *  Version:    2.3
  *  Copyright:  Michael Blank
  
  This library is free software; you can redistribute it and/or
@@ -30,6 +30,9 @@
 
 #define COMMAND_OK       0
 #define COMMAND_ERROR    1
+#define POWER_CHANNEL    127   // can be any value >= 112 and < 255
+    // used for transmitting power state
+ 
 
 
 class SX22Command {

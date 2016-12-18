@@ -64,8 +64,10 @@ void SX22Command::decode(String s) {
 		rv = (rv * 10) + (s[pos] - '0');
 		pos++;
 	}
-	if (rv >= MAX_CHANNEL_NUMBER) {
-		return;   // number >111 => error
+	if ((rv >= MAX_CHANNEL_NUMBER) && 
+            (rv != POWER_CHANNEL)) {
+		return;   // number >111 (and not equal to 
+                // POWER_CHANNEL => error
 	}
 	channel = (uint8_t) (rv & 0xff);
 
@@ -118,8 +120,10 @@ void SX22Command::decodeChannel(String s) {
 		rv = (rv * 10) + (s[pos] - '0');
 		pos++;
 	}
-	if (rv >= MAX_CHANNEL_NUMBER) {
-		return;   // number >111 => error
+	if  ((rv >= MAX_CHANNEL_NUMBER) && 
+             (rv != POWER_CHANNEL)) {
+		return;   // number >111 (and not equal to 
+                // POWER_CHANNEL => error
 	}
 	channel = (uint8_t) (rv & 0xff);
 
