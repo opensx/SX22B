@@ -25,6 +25,9 @@
  *                             F 111 <d11> \n )
  *  channel number 127 is used for track power transmission 
  *   (1 or 0)
+ *   
+ *  3. hardware and software revision can be queried by 
+ *  sending "I" or "ID" command
  *            
  *  All strings must be terminated by new-line character.
  *  If a correct command "S ..." is received, "OK" is answered
