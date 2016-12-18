@@ -34,6 +34,8 @@
 #include <SX22Command.h>   // this is the Selectrix Command library
 
 #define LED_PIN  13   // on most Arduinos there is an LED at pin 13
+#define MAX_SX_CHANNEL   109   // do not read values above 110
+              // because FCC does some "strange" multiplexing
 
 SX22b sx;                // library
 SX22Command sxcmd;       // holds command data
@@ -127,7 +129,8 @@ void serialEvent() {
 					|| (inputString[0] == 'R')) { // READ command
 				sxcmd.decodeChannel(inputString);
 				if (sxcmd.err == COMMAND_OK) {
-					printSXValue(sxcmd.channel, sxcmd.data);   // send value to serial port
+          int d = sx.get(sxcmd.channel);
+					printSXValue(sxcmd.channel, d);   // send value to serial port
 					toggleLed();  // 					
 				} else {
 					Serial.println("ERR");
@@ -146,7 +149,7 @@ void serialEvent() {
 void loop() {
 
 	// check selectrix channels for changes
-	for (int i = 0; i < 112; i++) {
+	for (int i = 0; i <= MAX_SX_CHANNEL; i++) {
 		byte d = sx.get(i);
 		if (oldSx[i] != d) {   // data have changed on SX bus
 			oldSx[i] = d;
