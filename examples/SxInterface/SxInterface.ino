@@ -35,6 +35,10 @@
 #include <SX22b.h>   // this is the Selectrix library
 #include <SX22Command.h>   // this is the Selectrix Command library
 
+#define HARDWARE_ID  "ID HW: opensx SX-interface 0.1"
+#define SOFTWARE_ID  "ID SW: SxInterface.ino 18 Dec 2016"
+#define SXLIB_ID     "ID LIB: SX22b"
+
 #define LED_PIN  13   // on most Arduinos there is an LED at pin 13
 #define MAX_SX_CHANNEL   110   // do not read values >= 110
       // because FCC does some "strange" multiplexing above 110
@@ -163,7 +167,11 @@ void serialEvent() {
 				} else {
 					Serial.println("ERR");
 				}
-			} else {
+			} else if (inputString[0] == 'i'){
+        Serial.println(HARDWARE_ID);
+        Serial.println(SOFTWARE_ID);
+        Serial.println(SXLIB_ID);
+      } else {
 				Serial.println("ERR");
 			}
 			//Serial.print("read=");
