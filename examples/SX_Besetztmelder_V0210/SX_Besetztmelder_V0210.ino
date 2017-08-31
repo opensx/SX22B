@@ -1,9 +1,9 @@
 /*******************************************************************************************
- * SX_Belegtmelder_V0210
+ * SX_Belegtmelder_V0210 
  *
  * Created:    17.02.2015
  * Copyright:  Reinhard Thamm
- * Version:    V01.00
+ * Version:    V02.11
  * 
  * Libraries: SX22: Quellen von M.Blank mit Ideen von U.Beyenbach und Änderungen von R.Thamm
  * Zielhardware/-controller: Arduino Pro Mini (5V, 16MHz), ATmega328
@@ -23,6 +23,7 @@
  * 
  
  * Changes:
+ * 30.08.2017:      OneButtong Lib verwendet für Programmiertaster
  * 28.07.2017:      Key besser entprellt für Start Programmiermodues
  * 12.04.2015:      Zielhardware als #define hinzu. Damit können die Ports eingestellt
  *                  eingestellt werden, auf denen die Hardware das Belegtsignal 
@@ -37,10 +38,11 @@
  *                  "Programmieren über die Kanäle 1 bis 5" im Comment);
  *                  Zielhardware als #define entfernt
 *******************************************************************************************/
-//#define TESTVERSION  // aktiviert serielle Testausgaben und Dialog über Serial Interface
+#define TESTVERSION  // aktiviert serielle Testausgaben und Dialog über Serial Interface
 
 #include <SX22b.h>  // Pin2=T0=INT0, Pin4=T1, Pin6=SX-Write
 #include <EEPROM.h>
+#include <OneButton.h>
 
 SX22b sx;
 
@@ -53,11 +55,10 @@ SX22b sx;
 #define  PROGLED 13
 #define  PROGBUTTON 3
 #define  DEBOUNCETIME 200
-#define  PROG_ACTIVATE_TIME  3000      // (muss länger als 3 sec aktiv sein)
 
 #define  EEPROMSIZE 2                  // 2 Byte vorsehen: Adresse und Abfallverzögerung
 
-char swversion[] =    "SW V02.10";
+char swversion[] =    "SW V02.11";
 char hwversion[] =    "HW V01.02";
 
 int      SXAddr;
@@ -79,7 +80,7 @@ int      codedDelayTime;          // Abbildung in einem Byte: pro Digit=25ms, hi
                                   
 // für den Programmiervorgang über den SX-Bus:
 boolean  programming = false;
-uint32_t progButtonPressedTime = 0;
+OneButton progBtn(PROGBUTTON, true);  // 0 = key pressed
 
 #define  MAXPROGPARAM 5
 const byte SXAddress     = 0;
@@ -100,7 +101,7 @@ int      progValLimits[MAXPROGPARAM][2] =
 
 unsigned long time1;
 
-byte     TrackOn;
+byte     trackOn;
 
 volatile boolean running = false;
 
@@ -130,11 +131,12 @@ void setup(){
     digitalWrite(DataPin[i], HIGH);
     lastOccupied[i] = millis();
   }
-  pinMode(PROGLED, OUTPUT);
+
   digitalWrite(PROGLED, LOW);
+  pinMode(PROGLED, OUTPUT);
   
-  pinMode(PROGBUTTON, INPUT);
-  digitalWrite(PROGBUTTON, HIGH);                // enable pullup for active low input
+  progBtn.attachLongPressStart(toggleProgramming);
+  progBtn.setPressTicks(1000);  // button long press after 1 second
 
   running = false;
   SXOut = 0;   
@@ -233,6 +235,26 @@ void restoreOldSXValues() {
 #endif 
 
 }
+
+//******************************************************************************************
+void toggleProgramming() {
+  // called when button is long pressed
+#ifdef TESTVERSION
+  Serial.print(F("toggleProgramming, trackOn="));
+  Serial.println(trackOn);
+#endif
+
+if (!trackOn) {
+  // react to key press only when track voltage is off
+  if (!programming) {
+    startProgramming();
+  } else {
+    finishProgramming();
+  }
+} // !trackOn
+}
+
+
 //******************************************************************************************
 void startProgramming() {
 
@@ -306,12 +328,14 @@ void processProgramming() {
 void loop() {
 
   int x;
+
+  progBtn.tick();
   
   if (running) {
     running = false;
 
-    TrackOn = sx.getTrackBit();
-    if (TrackOn) {                        // Tracksignal = On
+    trackOn = sx.getTrackBit();
+    if (trackOn) {                        // Tracksignal = On
       if (programming) {
         finishProgramming();
       }
@@ -338,19 +362,7 @@ void loop() {
     }    // TrackSignal = On
     
     else {                              // Tracksignal = Off
-      uint8_t key = digitalRead(PROGBUTTON);
-      if (key == 0) {    // key = active low
-        progButtonPressedTime = millis();
-      } 
-      if ((millis() - progButtonPressedTime) > PROG_ACTIVATE_TIME ) {
-         if (!programming) {
-            startProgramming();
-            progButtonPressedTime = millis();
-         } else {
-            finishProgramming();
-            progButtonPressedTime = millis();
-         }
-      }
+
       if (programming) {            // process the received data from SX-bus 
         processProgramming();       
       } else {             // not programming
@@ -361,10 +373,7 @@ void loop() {
         }
     
     }    // TrackSignal = Off
-  } else {
-    // no sx signal, reset button
-    progButtonPressedTime = millis();
-  }    // running
+  }   // running
  
 
 #ifdef TESTVERSION
