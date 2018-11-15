@@ -46,7 +46,7 @@
 
 SX22b sx;
 
-#define  DEFAULTADDR  98               // die Adresse, auf die dieses Modul hört
+#define  DEFAULTADDR  90               // die Adresse, auf die dieses Modul hört
 #define  DEFAULTCODEDDELAYTIME 20      // *25ms = 500ms Abfallverzögerung
 #define  DELAYTIMEFACTOR 25            // 1 digit entspricht 25ms
 

@@ -36,7 +36,7 @@
 
 SX22b sx;
 
-#define  DEFAULTADDR  98               // die Adresse, auf die dieses Modul hört
+#define  DEFAULTADDR  91               // die Adresse, auf die dieses Modul hört
 #define  DEFAULTCODEDDELAYTIME 20      // *25ms = 500ms Abfallverzögerung
 #define  DELAYTIMEFACTOR 25            // 1 digit entspricht 25ms
 #define  DEFAULT_SENS  4
@@ -317,7 +317,7 @@ void finishProgramming() {
 // read serial port until NEWLINE is received with a timeout of 200msec
 void checkSerial() {
 	int n = Serial.readBytesUntil('\n', inputBuf, 19);
-	if ((inputBuf[0] == 'S') && (n >= 10)) {
+	if ((inputBuf[0] == 'S') && (n >= 9)) {
 		// update only when we have a complete result for 8 channels
 		// with correct starting char 'S'
 		//   like "S02300560"
