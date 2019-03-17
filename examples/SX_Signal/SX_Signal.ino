@@ -27,7 +27,7 @@
 
 #define TESTVERSION  // aktiviert serielle Testausgaben und Dialog über Serial Interface
 
-#include <SoftPWM.h>
+//#include <SoftPWM.h>
 #include <SX22b.h>   // this is the Selectrix library
 #include <EEPROM.h>
 #include <OneButton.h>
@@ -100,13 +100,27 @@ void setup() {
 	running = false;
 	SXOut = 0;
 
+ 
+  for (uint8_t j=0 ; j < N_SIG; j++) {
+     for (uint8_t i= 0 ; i < N_ASP; i++) {
+       pinMode(sig[j][i], OUTPUT);
+       if (i == 0) {
+         digitalWrite(sig[j][i], LOW);   // turn the RED LED on 
+       } else {
+         digitalWrite(sig[j][i], HIGH);   // turn other LEDs off  
+       }                 
+    }
+  }
+  
+  
+  
 	//**************** init pins and SoftPWM lib
-	SoftPWMBegin();
+	/*SoftPWMBegin();
 	for (int i = 0; i < N_ASP; i++) {
 		for (uint8_t j = 0; j < N_SIG; j++) {
 			SoftPWMSet(sig[j][i], 255);   // off
 		}
-	}
+	} 
 
 	SoftPWMSetFadeTime(ALL, 800, 800);
 
@@ -114,7 +128,7 @@ void setup() {
 	for (uint8_t j = 0; j < N_SIG; j++) {
 		last[j] = 0;
 		SoftPWMSet(sig[j][0], 0);
-	}
+	}  */
 
 	//**** init EEPROM and Decoder Address
 	if (!EEPROMEmpty()) {
@@ -278,8 +292,19 @@ void processProgramming() {
 	}
 }
 
-//******************************************************************************************
 void setSignalState(uint8_t n, uint8_t st) {
+  if ((n >= N_SIG) || (st > N_ASP)) return;
+  for (uint8_t i= 0 ; i < N_ASP; i++) {
+      pinMode(sig[n][i], OUTPUT);
+      digitalWrite(sig[n][i], HIGH);   // turn the LEDs off                   
+  }
+  if (st < N_ASP) {
+  digitalWrite(sig[n][st], LOW);
+  }  // else: all LEDs off
+}
+
+//******************************************************************************************
+/*void setSignalState(uint8_t n, uint8_t st) {
 	if (n >= N_SIG)
 		return;  // error
 
@@ -298,7 +323,7 @@ void setSignalState(uint8_t n, uint8_t st) {
 		}
 		last[n] = st;
 	}
-}
+}  */
 
 //******************************************************************************************
 void loop() {
@@ -319,6 +344,31 @@ void loop() {
 				byte val = 0;
 
 				if (d != oldSXData) {
+          for (uint8_t sig = 0; sig < N_SIG; sig++) {
+            switch (sig) {
+            case 0:
+              val = (d & 0x03);  // last 2 sx bits (1,2)
+              //if (val != last[sig])
+                setSignalState(0, val);
+              break;
+            case 1:
+              val = ((d >> 2) & 0x03);  // sx bit 3,4
+              //if (val != last[sig])
+                setSignalState(1, val);
+              break;
+            case 2:
+              val = ((d >> 4) & 0x03);  // sx bit 5,6
+              //if (val != last[sig])
+                setSignalState(2, val);
+              break;
+            case 3:
+              val = ((d >> 6) & 0x03);  // sx bit 7,8
+              //if (val != last[sig])
+                setSignalState(3, val);
+              break;
+            }
+          }  
+        /*
 					for (uint8_t sig = 0; sig < N_SIG; sig++) {
 						switch (sig) {
 						case 0:
@@ -342,9 +392,9 @@ void loop() {
 								setSignalState(0, val);
 							break;
 						}
-					}
+					} */
 #ifdef TESTVERSION
-					Serial.print("d=");
+					Serial.print("d=0x");
 					Serial.println(d,HEX);
 #endif
 					oldSXData = d;
