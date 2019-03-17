@@ -110,19 +110,19 @@ void setup() {
 
 #ifdef PWM_ON
   //**************** init pins and SoftPWM lib
-  SoftPWMBegin();
+  SoftPWMBegin(SOFTPWM_INVERTED);
   for (int i = 0; i < N_ASP; i++) {
     for (uint8_t j = 0; j < N_SIG; j++) {
-      SoftPWMSet(sig[j][i], 255);   // off
+      SoftPWMSet(sig[j][i], 0);   // off
     }
   } 
 
-  SoftPWMSetFadeTime(ALL, 500, 500);
+  SoftPWMSetFadeTime(ALL, 200, 800);
 
   // switch red(hp0) on for all signals
   for (uint8_t j = 0; j < N_SIG; j++) {
     last[j] = 0;
-    SoftPWMSet(sig[j][0], 0);
+    SoftPWMSet(sig[j][0], 255);
   }   
 
   
@@ -313,17 +313,18 @@ void setSignalState(uint8_t n, uint8_t st) {
 
   if ((st >= 0) && (st <= 3)) {
     // switch last off
-    SoftPWMSet(sig[n][last[n]], 255);
+    SoftPWMSet(sig[n][last[n]], 0);
     // swith new state on
     if (st != 3) {
       if ((last[n] != 0) && (st != 0)) {
+        delay(200);
         // first switch to red
-        SoftPWMSet(sig[n][0], 0);  // red on
+        SoftPWMSet(sig[n][0], 255);  // red on
         delay(1000);
-        SoftPWMSet(sig[n][0], 255);  // red off
+        SoftPWMSet(sig[n][0], 0);  // red off
       }
     } 
-    SoftPWMSet(sig[n][st], 0);
+    SoftPWMSet(sig[n][st], 255);
   }
   last[n] = st;
 }  
