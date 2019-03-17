@@ -29,7 +29,7 @@
 #define PWM_ON
 
 #ifdef PWM_ON
-#include <SoftPWM_SX12.h>
+#include "SoftPWM_SX12.h"
 #endif
 
 #include <SX22b.h>   // this is the Selectrix library
@@ -117,7 +117,7 @@ void setup() {
     }
   } 
 
-  SoftPWMSetFadeTime(ALL, 8, 8);
+  SoftPWMSetFadeTime(ALL, 500, 500);
 
   // switch red(hp0) on for all signals
   for (uint8_t j = 0; j < N_SIG; j++) {
@@ -315,16 +315,17 @@ void setSignalState(uint8_t n, uint8_t st) {
     // switch last off
     SoftPWMSet(sig[n][last[n]], 255);
     // swith new state on
-    /*if (st != 3) {
+    if (st != 3) {
       if ((last[n] != 0) && (st != 0)) {
         // first switch to red
         SoftPWMSet(sig[n][0], 0);  // red on
         delay(1000);
         SoftPWMSet(sig[n][0], 255);  // red off
-      } */
-      SoftPWMSet(sig[n][st], 0);
-    }
-    last[n] = st;
+      }
+    } 
+    SoftPWMSet(sig[n][st], 0);
+  }
+  last[n] = st;
 }  
 #else
 void setSignalState(uint8_t n, uint8_t st) {
