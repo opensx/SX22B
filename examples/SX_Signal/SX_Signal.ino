@@ -32,7 +32,9 @@
 
 #ifdef PWM_ON
 #include "SoftPWM_SX12.h"
-
+#define RED_ON     100
+#define GREEN_ON   100
+#define YELLOW_ON  255
 #endif
 
 #include <SX22b.h>   // this is the Selectrix library
@@ -127,7 +129,7 @@ void setup() {
   // switch red(hp0) on for all signals
   for (uint8_t j = 0; j < N_SIG; j++) {
     last[j] = 0;
-    SoftPWMSet(sig[j][0], 255);
+    SoftPWMSet(sig[j][0], RED_ON);
   }   
 
   
@@ -324,29 +326,29 @@ void setSignalState(uint8_t nsig, uint8_t state) {
       if ((last[nsig] == 1) || (last[nsig] == 2) ) {       
         SoftPWMSet(sig[nsig][last[nsig]], 0);
       }
-      SoftPWMSet(sig[nsig][state], 255);  // red on
+      SoftPWMSet(sig[nsig][state], RED_ON);  // red on
       break;
     case 1:
       if (last[nsig] ==  2) {       
         SoftPWMSet(sig[nsig][last[nsig]], 0);
         delay(200);
         // first switch to red
-        SoftPWMSet(sig[nsig][0], 255);  // red on
+        SoftPWMSet(sig[nsig][0], RED_ON);  // red on
         delay(1000);
       }
       SoftPWMSet(sig[nsig][0], 0);  // red off  
-      SoftPWMSet(sig[nsig][state], 255);   // green on
+      SoftPWMSet(sig[nsig][state], GREEN_ON);   // green on
       break;
     case 2:
       if (last[nsig] ==  1) {       
         SoftPWMSet(sig[nsig][last[nsig]], 0);
         delay(200);
         // first switch to red
-        SoftPWMSet(sig[nsig][0], 255);  // red on
+        SoftPWMSet(sig[nsig][0], RED_ON);  // red on
         delay(1000);
       }
       SoftPWMSet(sig[nsig][0], 0);  // red off
-      SoftPWMSet(sig[nsig][state], 255);   // yellow on
+      SoftPWMSet(sig[nsig][state], YELLOW_ON);   // yellow on
       break;
     case 3:
       SoftPWMSet(sig[nsig][0], 0);  // red off
