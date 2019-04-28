@@ -56,4 +56,3 @@ void SoftPWMSetFadeTime(int8_t pin, uint16_t fadeUpTime, uint16_t fadeDownTime);
 void SoftPWMSetPolarity(int8_t pin, uint8_t polarity);
 
 #endif
-

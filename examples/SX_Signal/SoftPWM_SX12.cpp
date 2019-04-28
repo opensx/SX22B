@@ -272,13 +272,13 @@ void SoftPWMSetFadeTime(int8_t pin, uint16_t fadeUpTime, uint16_t fadeDownTime)
       if (fadeUpTime > 0)
         fadeAmount = 2000UL / fadeUpTime;   // CHANGED
 
-      _softpwm_channels[i].fadeuprate = 4; // fadeAmount;
+      _softpwm_channels[i].fadeuprate = fadeAmount;  //  was 4
 
       fadeAmount = 0;
       if (fadeDownTime > 0)
         fadeAmount = 2000UL / fadeDownTime;   // CHANGED
 
-      _softpwm_channels[i].fadedownrate = 4; //fadeAmount;
+      _softpwm_channels[i].fadedownrate = fadeAmount;
 
       if (pin >= 0)  // we've set individual pin
         break;

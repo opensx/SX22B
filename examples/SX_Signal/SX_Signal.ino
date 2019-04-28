@@ -1,9 +1,11 @@
+
+
 /*
  Signal-Dekoder für US-Signale
  "SX-Signal"
 
  HW         = SX-Signal (1.0)
- SW Version:    0.3
+ SW Version:    0.4
 
  *  Created on: 16 Mar 2019
  *  Changed on: see git
@@ -30,6 +32,7 @@
 
 #ifdef PWM_ON
 #include "SoftPWM_SX12.h"
+
 #endif
 
 #include <SX22b.h>   // this is the Selectrix library
@@ -43,7 +46,7 @@
 #define  DEBOUNCETIME 200
 #define  EEPROMSIZE 1                  // 1 Byte vorsehen: Adresse
 
-char swversion[] = "SW V00.3";
+char swversion[] = "SW V00.4";
 char hwversion[] = "HW V01.1";
 
 #define N_ASP  3 
@@ -78,6 +81,8 @@ int progValLimits[MAXPROGPARAM][2] = { { 1, 102 } // SXAddress    lower/upper li
 byte trackOn;
 
 volatile boolean running = false;
+
+static uint32_t time0 = 0;
 
 void sxisr(void) {
 	// if you want to understand this, see:
@@ -117,7 +122,7 @@ void setup() {
     }
   } 
 
-  SoftPWMSetFadeTime(ALL, 200, 800);
+  SoftPWMSetFadeTime(ALL, 400, 400);     // 200,800
 
   // switch red(hp0) on for all signals
   for (uint8_t j = 0; j < N_SIG; j++) {
@@ -129,7 +134,7 @@ void setup() {
 
 #else
   for (uint8_t j=0 ; j < N_SIG; j++) {
-     for (uint8_t i= 0 ; i < N_ASP; i++) {
+    for (uint8_t i= 0 ; i < N_ASP; i++) {
        pinMode(sig[j][i], OUTPUT);
        if (i == 0) {
          digitalWrite(sig[j][i], LOW);   // turn the RED LED on 
@@ -137,6 +142,7 @@ void setup() {
          digitalWrite(sig[j][i], HIGH);   // turn other LEDs off  
        }                 
     }
+    last[j] = 0;
   }
 #endif  
   
@@ -307,43 +313,128 @@ void processProgramming() {
 
 //******************************************************************************************
 #ifdef PWM_ON
-void setSignalState(uint8_t n, uint8_t st) {
-  if (n >= N_SIG)
+void setSignalState(uint8_t nsig, uint8_t state) {
+  if (nsig >= N_SIG)
     return;  // error
-
-  if ((st >= 0) && (st <= 3)) {
-    // switch last off
-    SoftPWMSet(sig[n][last[n]], 0);
-    // swith new state on
-    if (st != 3) {
-      if ((last[n] != 0) && (st != 0)) {
+  if (state == last[nsig])
+    return;  // do nothing, no change
+    
+  switch (state) {
+    case 0:
+      if ((last[nsig] == 1) || (last[nsig] == 2) ) {       
+        SoftPWMSet(sig[nsig][last[nsig]], 0);
+      }
+      SoftPWMSet(sig[nsig][state], 255);  // red on
+      break;
+    case 1:
+      if (last[nsig] ==  2) {       
+        SoftPWMSet(sig[nsig][last[nsig]], 0);
         delay(200);
         // first switch to red
-        SoftPWMSet(sig[n][0], 255);  // red on
+        SoftPWMSet(sig[nsig][0], 255);  // red on
         delay(1000);
-        SoftPWMSet(sig[n][0], 0);  // red off
       }
-    } 
-    SoftPWMSet(sig[n][st], 255);
+      SoftPWMSet(sig[nsig][0], 0);  // red off  
+      SoftPWMSet(sig[nsig][state], 255);   // green on
+      break;
+    case 2:
+      if (last[nsig] ==  1) {       
+        SoftPWMSet(sig[nsig][last[nsig]], 0);
+        delay(200);
+        // first switch to red
+        SoftPWMSet(sig[nsig][0], 255);  // red on
+        delay(1000);
+      }
+      SoftPWMSet(sig[nsig][0], 0);  // red off
+      SoftPWMSet(sig[nsig][state], 255);   // yellow on
+      break;
+    case 3:
+      SoftPWMSet(sig[nsig][0], 0);  // red off
+      SoftPWMSet(sig[nsig][1], 0);  // green off
+      SoftPWMSet(sig[nsig][2], 0);  // yellow off
+      break;
+    
   }
-  last[n] = st;
 }  
 #else
-void setSignalState(uint8_t n, uint8_t st) {
-  if ((n >= N_SIG) || (st > N_ASP)) return;
+void setSignalState(uint8_t nsig, uint8_t state) {
+  if ((nsig >= N_SIG) || (state > N_ASP)) return;
   for (uint8_t i= 0 ; i < N_ASP; i++) {
-      pinMode(sig[n][i], OUTPUT);
-      digitalWrite(sig[n][i], HIGH);   // turn the LEDs off                   
+    pinMode(sig[nsig][i], OUTPUT);
+    digitalWrite(sig[nsig][i], HIGH);   // turn the LEDs off                   
   }
-  if (st < N_ASP) {
-  digitalWrite(sig[n][st], LOW);
+  if (state < N_ASP) {
+    digitalWrite(sig[nsig][state], LOW);
   }  // else: all LEDs off
-  last[n] = st;
+
 }
 #endif
 
+//******************************************************************************************
 
+void processSignals() {
+/* TEST static uint8_t redon = 0;
+     if ((millis() - time0) > 2000) {
+        //SoftPWMSet(sig[0][0], 0);
+        time0 = millis();
+        if (redon) {
+           SoftPWMSet(sig[0][0], 0);
+           redon = 0;
+        } else {
+           SoftPWMSet(sig[0][0], 255);
+           redon = 1;
+        }
+        Serial.println(redon);
+     }
+     return;  */
+  
+    // check selectrix channels for changes
+        byte d = sx.get(DecoderSXAddr);
+        byte val = 0;
 
+        if (d != oldSXData) {
+          for (uint8_t sig = 0; sig < N_SIG; sig++) {
+            switch (sig) {
+            case 0:
+              val = (d & 0x03);  // last 2 sx bits (1,2)
+              if (val != last[0]) {
+                 setSignalState(0, val);
+                 last[0] = val;
+              }
+              break;
+            case 1:
+              val = ((d >> 2) & 0x03);  // sx bit 3,4
+              if (val != last[1]) {
+                 setSignalState(1, val);
+                 last[1] = val;
+              }
+              break;
+            case 2:
+              val = ((d >> 4) & 0x03);  // sx bit 5,6
+              if (val != last[2]) {
+                 setSignalState(2, val);
+                 last[2] = val;
+              }
+              break;
+            case 3:
+              val = ((d >> 6) & 0x03);  // sx bit 7,8
+              if (val != last[3]) {
+                 setSignalState(3, val);
+                 last[3] = val;
+              }
+              break;
+            }
+          } 
+
+ 
+#ifdef TESTVERSION
+          Serial.print("d=0x");
+          Serial.println(d,HEX);
+#endif
+          oldSXData = d;
+        }
+
+}
 
 //******************************************************************************************
 void loop() {
@@ -353,53 +444,13 @@ void loop() {
 	if (running) {
 		running = false;
 
+    processSignals();
+    
 		trackOn = sx.getTrackBit();
 		if (trackOn) {                        // Tracksignal = On
 			if (programming) {
 				finishProgramming();
-			} else {
-
-				// check selectrix channels for changes
-				byte d = sx.get(DecoderSXAddr);
-				byte val = 0;
-
-				if (d != oldSXData) {
-          for (uint8_t sig = 0; sig < N_SIG; sig++) {
-            switch (sig) {
-            case 0:
-              val = (d & 0x03);  // last 2 sx bits (1,2)
-              if (val != last[0]) {
-                 setSignalState(0, val);
-              }
-              break;
-            case 1:
-              val = ((d >> 2) & 0x03);  // sx bit 3,4
-              if (val != last[1]) {
-                  setSignalState(1, val);
-              }
-              break;
-            case 2:
-              val = ((d >> 4) & 0x03);  // sx bit 5,6
-              if (val != last[2]) {
-                  setSignalState(2, val);
-              }
-              break;
-            case 3:
-              val = ((d >> 6) & 0x03);  // sx bit 7,8
-              if (val != last[3]) {
-                setSignalState(3, val);
-              }
-              break;
-            }
-          }  
- 
-#ifdef TESTVERSION
-					Serial.print("d=0x");
-					Serial.println(d,HEX);
-#endif
-					oldSXData = d;
-				}
-			}
+			} 
 		} else {                              // Tracksignal = Off
 			if (programming) { // process the received data from SX-bus
 				processProgramming();
